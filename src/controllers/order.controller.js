@@ -1,0 +1,138 @@
+import orderService from "../services/order.service.js";
+
+const  getOrders=async(req,res)=>{
+    try {
+        const orders = await orderService.getOrders()
+        
+    } catch (error) {
+        res.status(400).json(error.message)
+        
+    }
+};
+
+const getOrderById=async(req,res)=>{
+    try {
+       const order = await orderService.getOrderById(req.params.id);
+       res.json(order);
+
+        
+    } catch (error) {
+          res.status(400).json(error.message)
+
+    }
+};
+const getOrdersByUser=async(req,res)=>{
+    try {
+      const orders = await orderService.getOrdersByUser(req.user._id)
+
+        res.json(orders)
+    } catch (error) {
+          res.status(400).json(error.message)
+
+    }
+};
+
+const getOrderByMerchant = async (req, res) => {
+    try {
+        const orders = await orderService.getOrderByMerchant(req.user._id);
+
+        return res.status(200).json(orders);
+    } catch (error) {
+        return res.status(400).json(error.message || "Failed to fetch merchant orders.");
+    }
+};
+const createOrder=async(req,res)=>{
+    try {
+        const createOrder = await orderService.createOrder(req.body, req.user);
+
+        res.json(createOrder)
+        
+    } catch (error) {
+        res.status(400).json(error.message)
+
+    }
+};
+
+const updateOrderStatus=async(req,res)=>{
+    if(!req.body?.status ){
+        return res.status(400).send("Status is required.")
+    }
+    try {
+      const order = await orderService.updateOrderStatus(req.params.id, req.body.status);
+
+        res.json(order)
+        
+    } catch (error) {
+    res.status(400).json(error.message)
+        
+    }
+};
+
+const cancelOrder=async(req,res)=>{
+    try {
+    const order = await orderService.cancelOrder(req.params.id);
+
+        res.json(order)
+    } catch (error) {
+    res.status(400).json(error.message)
+
+    }
+};
+
+const deleteOrder=async(req,res)=>{
+    try {
+   await orderService.deleteOrder(req.params.id);
+
+   res.json({message: "Order deleted"})
+
+        
+    } catch (error) {
+       res.status(400).json(error.message)
+        
+    }
+};
+
+const confirmOrder=async(req,res)=>{
+    try {
+    const order = await orderService.confirmOrder(req.params.id, req.body?.status,);
+
+        res.json(order);
+    } catch (error) {
+        res.status(400).json(error.message);
+    }
+};
+
+const orderPaymentViaCash=async(req,res)=>{
+    try {
+    const order = await orderService.orderPaymentViaCash(req.params.id);
+
+        res.json(order);
+    } catch (error) {
+        res.status(400).json(error.message);
+    }
+};
+
+const orderPaymentViaKhalti=async(req,res)=>{
+    try {
+    const order = await orderService.orderPaymentViaKhalti(req.params.id);
+
+        res.json(order);
+    } catch (error) {
+        res.status(400).json(error.message);
+    }
+};
+
+export default{
+ getOrders,
+getOrderById,
+createOrder,
+updateOrderStatus,
+cancelOrder,
+deleteOrder,
+confirmOrder,
+getOrdersByUser,
+getOrderByMerchant,
+orderPaymentViaCash,
+orderPaymentViaKhalti
+
+}
