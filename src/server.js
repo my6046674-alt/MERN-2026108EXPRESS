@@ -1,6 +1,7 @@
 import express from "express";
 import multer from "multer";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 
 import productRoute from "./routes/product.routes.js";
 import userRoute from "./routes/user.route.js";
@@ -15,6 +16,8 @@ import config from "./config/config.js";
 import promptAI from "./utils/ai.js";
 
 const upload = multer({storage: multer.memoryStorage() });
+import dns from "node:dns/promises"
+dns.setServers(["8.8.8.8", "1.1.1.1"])
 
 const app = express();
 
@@ -25,6 +28,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 app.use(logger);
+app.use(cors());
 
 app.get("/", (req, res) => {
     res.send("Home page");

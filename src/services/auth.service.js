@@ -6,18 +6,27 @@ import config from "../config/config.js";
 import sendEmail from "../utils/email.js";
 
 const normalizeEmail = (email) => String(email ?? "").trim().toLowerCase();
+const normalizePhone = (phone) => String(phone ?? "").trim();
 
 const escapeRegex = (value = "") => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 const login = async (data)=>{
-    const email = normalizeEmail(data?.email);
+  const email = normalizeEmail(data?.email);
+  const phone = normalizePhone(data?.phone);
+  const query = email
+    ? { email: { $regex: new RegExp(`^${escapeRegex(email)}$`, "i") } }
+    : phone
+      ? { phone }
+      : null;
 
-    const user = await User.findOne({
-        $or: [
-            { email: { $regex: new RegExp(`^${escapeRegex(email)}$`, "i") } },
-            { phone: data?.phone }
-        ]
-    });
+  if (!query) {
+    throw {
+      status: 400,
+      message: "Email or phone is required."
+    };
+  }
+
+  const user = await User.findOne(query);
 
     if(!user){
         throw{
@@ -56,6 +65,7 @@ const login = async (data)=>{
 
 const register =async (data)=>{
       const email = normalizeEmail(data.email);
+  const phone = normalizePhone(data.phone);
       const user = await User.findOne({
         email: { $regex: new RegExp(`^${escapeRegex(email)}$`, "i") }
       });
@@ -75,6 +85,7 @@ const register =async (data)=>{
      const createdUser = await User.create({
         ...data,
           email,
+          phone,
           role: Array.isArray(data.role) ? data.role : (data.roles ?? ["CUSTOMER"]),
         password: hashedPassword,
      })

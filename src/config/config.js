@@ -7,7 +7,7 @@ const config = {
 
     port: Number(process.env.PORT) || 3000,
 
-    mongodbUrl: process.env.MONGODB_URL || process.env.MONGODGB_URL || "",
+    mongodbUrl: process.env.MONGODB_URL || process.env.MONGODB_URL || "",
 
     jwtSecret: process.env.JWT_SECRET || "",
 
@@ -27,4 +27,3 @@ const config = {
 };
 
 export default config;
-
