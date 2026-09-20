@@ -1,34 +1,31 @@
 import jwt from "../utils/jwt.js";
 
 const auth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
+  let token;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  } else {
     const cookie = req.headers.cookie;
-    const authorization = req.headers.authorization;
-    const cookieToken = cookie?.split(";")
-        .map((part) => part.trim())
-        .find((part) => part.startsWith("authToken="))
-        ?.split("=")[1];
-    const bearerToken = authorization?.startsWith("Bearer ")
-        ? authorization.slice(7)
-        : undefined;
-    const token = cookieToken || bearerToken;
 
-    if (!token) {
-        return res.status(401).send(  "User not authenticated." );
-    }
+    if (!cookie) return res.status(401).send("User not authenticated.");
 
-    try {
+    token = cookie.split("=")[1];
+  }
 
-        const data = jwt.verifyToken(token);
+  if (!token) return res.status(401).send("User not authenticated.");
 
-        req.user = data;
+  try {
+    const data = jwt.verifyToken(token);
 
-        next();
+    req.user = data;
 
-    } catch (error) {
-
-     res.status(401).send("Invalid token.")
-    }
+    next();
+  } catch (error) {
+    res.status(401).send("Invalid token.");
+  }
 };
 
 export default auth;
