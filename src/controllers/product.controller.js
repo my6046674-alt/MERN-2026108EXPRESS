@@ -1,127 +1,94 @@
-import productService from "../services/product.service.js";
-
-
-
-const getAllProducts = async (req, res) => {
-    try {
-        const products = await productService.getAllProducts(req.query);
-
-        return res.json(products);
-
-    } catch (error) {
-        return res.status(error.status || 500).json({
-            message: error.message
-        });
-    }
-};
-
-
-const getProductById = async (req, res) => {
-    try {
-        const product = await productService.getProductById(
-            req.params.id
-        );
-
-        return res.json(product);
-
-    } catch (error) {
-        return res.status(error.status || 404).json({
-            message: error.message
-        });
-    }
-};
-
+import productServices from "../services/product.services.js";
+import uploadFiles from "../utils/fileUploader.js";
 
 const createProduct = async (req, res) => {
-    const userId = req.user._id;
+  try {
+    const createdProduct = await productServices.createProduct(
+      req.body,
+      req.files,
+      req.user._id,
+    );
 
-    const files=  req.files;
-    
-
-    try {
-        const product = await productService.createProduct(req.body,req.files, userId);
-        res.json(product);
-
-    } catch (error) {
-        return res.status(error.status || 400).json({
-            message: error.message
-        });
-    }
+    res.status(201).json(createdProduct);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
+const getProducts = async (req, res) => {
+  try {
+    const products = await productServices.getProducts(req.query);
 
-const updateProduct = async (req, res) => {
-    const id = req.params.id;
-    const input = req.body;
-
-    try {
-        const product = await productService.updateProduct(
-            id,
-            input,
-            req.files
-        );
-
-        return res.json(product);
-
-    } catch (error) {
-        return res.status(error.status || 404).json({
-            message: error.message
-        });
-    }
-};
-
-
-const deleteProduct = async (req, res) => {
-    const id = req.params.id;
-
-    try {
-        await productService.deleteProduct(id);
-
-        return res.json({
-            message: "Product deleted successfully."
-        });
-
-    } catch (error) {
-        return res.status(error.status || 404).json({
-            message: error.message
-        });
-    }
+    res.json(products);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
 const getBrands = async (req, res) => {
-    
-        const brands = await productService.getBrands();
+  try {
+    const brands = await productServices.getBrands();
 
-        return res.json(brands);
-
-    
+    res.json(brands);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
+
 const getCategories = async (req, res) => {
-    
-        const categories = await productService.getCategories();
+  try {
+    const categories = await productServices.getCategories();
 
-        return res.json(categories);
-
-    
-};
-const getTotalCount = async (req, res) => {
-    
-        const count = await productService.getTotalCount();
-
-        return res.json(count);
-
-    
+    res.json(categories);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
+const getProductById = async (req, res) => {
+  try {
+    const product = await productServices.getProductById(req.params.id);
+
+    res.json(product);
+  } catch (error) {
+    res.status(error.statusCode || 400).json({ message: error.message });
+  }
+};
+
+const updateProduct = async (req, res) => {
+  try {
+    const product = await productServices.updateProduct(
+      req.params.id,
+      req.body,
+      req.user._id,
+      req.files,
+    );
+
+    res.json(product);
+  } catch (error) {
+    res.status(error.statusCode || 400).json({ message: error.message });
+  }
+};
+
+const deleteProduct = async (req, res) => {
+  try {
+    const data = await productServices.deleteProduct(
+      req.params.id,
+      req.user._id,
+    );
+
+    res.json(data);
+  } catch (error) {
+    res.status(error.statusCode || 400).json({ message: error.message });
+  }
+};
 
 export default {
-    getAllProducts,
-    getProductById,
-    createProduct,
-    updateProduct,
-    deleteProduct,
-    getBrands,
-    getCategories,
-    getTotalCount
+  createProduct,
+  getProducts,
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  getBrands,
+  getCategories,
 };
-

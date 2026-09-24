@@ -3,9 +3,9 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const config = {
-    appUrl: process.env.APP_URL || "http://localhost:3000",
+    appUrl: process.env.APP_URL || "http://localhost:8000",
 
-    port: Number(process.env.PORT) || 3000,
+    port: Number(process.env.PORT) || 8000,
 
     mongodbUrl: process.env.MONGODB_URL || process.env.MONGODB_URL || "",
 

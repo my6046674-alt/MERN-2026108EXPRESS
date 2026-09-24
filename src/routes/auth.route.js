@@ -1,19 +1,43 @@
-
 import express from "express";
-import authController from "../controllers/auth.controller.js";
+import authControllers from "../controllers/auth.controllers.js";
 import validate from "../middlewares/validator.js";
-import { forgotPasswordSchema, loginSchema, registerSchema, resetPassword } from "../libs/schemas/auth.schema.js";
+import {
+  forgotPasswordSchema,
+  loginSchema,
+  registerSchema,
+  resetPasswordSchema,
+} from "../libs/schemas/auth.schema.js";
 
 const router = express.Router();
 
-// path: /api/auth/login
-// path: /api/auth/register
-router.post("/login",validate(loginSchema), authController.login);
+/**
+ * Login
+ * URL: /api/auth/login
+ * HTTP Method: POST
+ */
 
-router.post("/register", validate(registerSchema), authController.register);
-router.post("/forgot-password", validate(forgotPasswordSchema), authController.forgotPassword);
-router.post("/reset-password", validate(resetPassword), authController.resetPassword);
+router.post("/login", validate(loginSchema), authControllers.login);
 
+/**
+ * Register
+ * URL: /api/auth/register
+ * HTTP Method: POST
+ */
 
+router.post("/register", validate(registerSchema), authControllers.register);
 
-export default router; 
+router.post("/logout", authControllers.logout);
+
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordSchema),
+  authControllers.forgotPassword,
+);
+
+router.post(
+  "/reset-password",
+  validate(resetPasswordSchema),
+  authControllers.resetPassword,
+);
+
+export default router;

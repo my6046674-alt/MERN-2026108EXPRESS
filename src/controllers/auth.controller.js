@@ -1,105 +1,63 @@
-import authService from "../services/auth.service.js";
+import authServices from "../services/auth.services.js";
 import jwt from "../utils/jwt.js";
 
 const login = async (req, res) => {
-    const input = req.body;
+  try {
+    const data = await authServices.login(req.body);
 
-    try { 
+    const token = jwt.generateToken(data);
 
-    const user = await authService.login(input);
+    res.cookie("authToken", token, {
+      maxAge: 86400 * 1000, // 1 day in milliseconds
+    });
 
-     const token = jwt.createToken(user);
-
-        res.cookie("authToken", token, {
-            maxAge: 86400 * 1000,
-            httpOnly: true
-        });
-
-        return res.json({
-            ...user,
-            token
-        });
-
-    } catch (error) {
-        return res
-            .status(error.status || 400)
-            .json({
-                message: error.message
-            });
-    }
+    res.json(data);
+  } catch (error) {
+    console.log(error);
+    res.status(error.statusCode || 400).json({ message: error.message });
+  }
 };
-
 
 const register = async (req, res) => {
-    const input = req.body;
+  try {
+    const data = await authServices.register(req.body);
 
-    try {
+    const token = jwt.generateToken(data);
 
-        const user = await authService.register(input);
+    res.cookie("authToken", token, {
+      maxAge: 86400 * 1000, // 1 day in milliseconds
+    });
 
-        const token = jwt.createToken(user);
-
-        res.cookie("authToken", token, {
-            maxAge: 86400 * 1000,
-            httpOnly: true
-        });
-
-        return res.json({
-            ...user,
-            token
-        });
-
-    } catch (error) {
-        return res
-            .status(error.status || 400)
-            .json({
-                message: error.message
-            });
-    }
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
 };
 
+const logout = (req, res) => {
+  res.clearCookie("authToken");
+
+  res.json({ message: "Logout succcessful" });
+};
 
 const forgotPassword = async (req, res) => {
-    const input = req.body;
+  try {
+    const data = await authServices.forgotPassword(req.body);
 
-    try {
-
-        const data = await authService.forgotPassword(input?.email);
-
-
-      
-      res.json(data)
-
-    } catch (error) {
-        return res
-            .status(error.status || 400)
-            .json({
-                message: error.message
-            });
-    }
+    res.json(data);
+  } catch (error) {
+    res.status(error.statusCode || 400).json({ message: error.message });
+  }
 };
+
 const resetPassword = async (req, res) => {
-    const input = req.body;
+  try {
+    const data = await authServices.resetPassword(req.body);
 
-    try {
-
-        const data = await authService.resetPassword(input);
-
-        return res.json(data);
-
-    } catch (error) {
-        return res
-            .status(error.status || 400)
-            .json({
-                message: error.message
-            });
-    }
+    res.json(data);
+  } catch (error) {
+    res.status(error.statusCode || 400).json({ message: error.message });
+  }
 };
 
-
-export default {
-    register,
-    login,
-    forgotPassword,
-    resetPassword
-};
+export default { login, register, logout, forgotPassword, resetPassword };

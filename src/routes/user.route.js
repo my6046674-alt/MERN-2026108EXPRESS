@@ -1,25 +1,66 @@
 import express from "express";
-import userController from "../controllers/user.controller.js";
+import userController from "../controllers/user.controllers.js";
+import validate from "../middlewares/validator.js";
+import {
+  updatePasswordSchema,
+  userSchema,
+} from "../libs/schemas/user.schema.js";
+import auth from "../middlewares/auth.js";
+import roleBasedAuth from "../middlewares/roleBasedAuth.js";
 import { ROLE_ADMIN } from "../constants/roles.js";
-import roleBasedAuth from "../middlewares/roleBasedAuth.js"
 
 const router = express.Router();
 
-router.post("/",roleBasedAuth(ROLE_ADMIN),  userController.createUser);
+router.get("/", auth, roleBasedAuth(ROLE_ADMIN), userController.getUsers);
 
-router.put("/profile-image", userController.updateProfileImage);
+router.get("/me", auth, userController.getAuthUser);
 
+// Dynamic route params
+router.get(
+  "/:userId",
+  auth,
+  roleBasedAuth(ROLE_ADMIN),
+  userController.getUserById,
+);
 
-router.get("/", roleBasedAuth(ROLE_ADMIN), userController.getAllUsers); 
+router.post(
+  "/",
+  auth,
+  roleBasedAuth(ROLE_ADMIN),
+  validate(userSchema),
+  userController.createUser,
+);
 
-router.get("/:id", userController.getById);
+router.put("/profile-image", auth, userController.updateProfileImage);
 
+router.put("/me", auth, userController.updateAuthUser);
 
-router.put("/:id", userController.updateUser);
+router.put(
+  "/:userId",
+  auth,
+  roleBasedAuth(ROLE_ADMIN),
+  userController.updateUser,
+);
 
-router.delete("/:id",roleBasedAuth(ROLE_ADMIN), userController.deleteUser);
+router.put(
+  "/me/change-password",
+  auth,
+  validate(updatePasswordSchema),
+  userController.updateAuthUserPassword,
+);
 
-router.patch("/:id/roles",roleBasedAuth(ROLE_ADMIN), userController.updateUserRoles);
+router.put(
+  "/:userId/change-password",
+  auth,
+  roleBasedAuth(ROLE_ADMIN),
+  userController.updatePassword,
+);
+
+router.delete(
+  "/:userId",
+  auth,
+  roleBasedAuth(ROLE_ADMIN),
+  userController.deleteUser,
+);
 
 export default router;
-

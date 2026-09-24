@@ -1,95 +1,140 @@
-import userService from "../services/user.service.js"
+import userServices from "../services/user.services.js";
 
+const getUsers = async (req, res) => {
+  const users = await userServices.getUsers();
 
-const createUser = async (req, res)=>{
-   try {
-     const user = await userService.createUser(req.body);
+  res.json(users);
+};
 
-    res.json(user);
-    
-   } catch (error) {
-    res.status(404).send(error.message);
-    
-   }
-}
-const getAllUsers = async (req, res)=>{
-   try {
-     const user = await userService.getAll(req.query);
+const getAuthUser = async (req, res) => {
+  const user = await userServices.getUserById(req.user._id);
 
-    res.json(user);
-    
-   } catch (error) {
-    res.status(404).send(error.message);
-    
-   }
-}
-const getById = async (req, res)=>{
-   try {
-     const user = await userService.getById(req.params.id, req.user);
+  if (!user) {
+    return res.send("User not found.");
+  }
 
-    res.json(user);
-    
-   } catch (error) {
-    res.status(error.status|| 400).send(error.message);
-    
-   }
-}
-const updateUser = async (req, res)=>{
+  res.json(user);
+};
 
-   try {
-     const user = await userService.updateUser(req.params.id, req.body, req.user);
+const getUserById = async (req, res) => {
+  const id = req.params.userId;
 
-    res.json(user);
-    
-   } catch (error) {
-    res.status(error.status|| 400).send(error.message);
-    
-   }
-}
-const deleteUser = async (req, res)=>{
-   try {
-     const user = await userService.deleteUser(req.params.id);
+  const user = await userServices.getUserById(id);
 
-    res.json(user);
-    
-   } catch (error) {
-    res.status(error.status|| 400).send(error.message);
-    
-   }
-}
+  if (!user) {
+    return res.send("User not found.");
+  }
 
+  res.json(user);
+};
 
-const updateProfileImage = async (req, res)=>{
+const createUser = async (req, res) => {
+  try {
+    const createdUser = await userServices.createUser(req.body);
 
+    res.json(createdUser);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-   try {
-   const user = await userService.updateProfileImage(req.user._id, req.file);
+const updateUser = async (req, res) => {
+  const id = req.params.userId;
+  const input = req.body;
 
-    res.json(user);
-    
-   } catch (error) {
-    res.status(error.status|| 400).send(error.message);
-    
-   }
-}
-const updateUserRoles = async (req, res)=>{
+  try {
+    const data = await userServices.updateUser(id, {
+      name: input.name,
+      phone: input.phone,
+      address: input.address,
+      email: input.email,
+      roles: input.roles,
+      isActive: input.isActive,
+    });
 
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-   try {
-   const user = await userService.updateUserRoles(
-      req.params.id,
-      req.body.roles,
-      req.user,
-   );
+const updateAuthUser = async (req, res) => {
+  const id = req.user._id;
+  const input = req.body;
 
-    res.json(user);
-    
-   } catch (error) {
-    res.status(error.status|| 400).send(error.message);
-    
-   }
-}
+  try {
+    const data = await userServices.updateUser(id, {
+      name: input.name,
+      phone: input.phone,
+      address: input.address,
+      email: input.email,
+    });
 
-export default {createUser, getAllUsers, getById, updateUser, deleteUser, updateProfileImage,updateUserRoles};
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
+const updatePassword = async (req, res) => {
+  const id = req.params.userId;
+  const input = req.body;
 
+  try {
+    const data = await userServices.updatePassword(id, req.body);
+
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const updateAuthUserPassword = async (req, res) => {
+  const id = req.user._id;
+  const input = req.body;
+
+  try {
+    const data = await userServices.updateAuthUserPassword(id, req.body);
+
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  const id = req.params.userId;
+
+  try {
+    await userServices.deleteUser(id);
+
+    res.json({
+      message: `User deleted for id: ${id}`,
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+const updateProfileImage = async (req, res) => {
+  try {
+    const data = await userServices.updateProfileImage(req.user._id, req.file);
+
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export default {
+  getUsers,
+  getAuthUser,
+  getUserById,
+  updatePassword,
+  createUser,
+  updateAuthUser,
+  deleteUser,
+  updateProfileImage,
+  updateUser,
+  updateAuthUserPassword,
+};

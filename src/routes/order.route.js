@@ -1,62 +1,52 @@
 import express from "express";
-import orderController from "../controllers/order.controller.js";
-import {
-  ROLE_ADMIN,
-  ROLE_CUSTOMER,
-  ROLE_MERCHANT,
-} from "../constants/roles.js";
+import orderControllers from "../controllers/order.controllers.js";
+import auth from "../middlewares/auth.js";
 import roleBasedAuth from "../middlewares/roleBasedAuth.js";
+import { ROLE_ADMIN, ROLE_CUSTOMER } from "../constants/roles.js";
+import validate from "../middlewares/validator.js";
+import {
+  orderSchema,
+  orderStatusSchema,
+} from "../libs/schemas/order.schema.js";
 
 const router = express.Router();
 
-router.get("/", roleBasedAuth(ROLE_ADMIN), orderController.getOrders);
+router.get("/", auth, roleBasedAuth(ROLE_ADMIN), orderControllers.getAllOrders);
 
 router.get(
-  "/user",
+  "/users",
+  auth,
   roleBasedAuth(ROLE_CUSTOMER),
-  orderController.getOrdersByUser,
+  orderControllers.getAllOrdersByUser,
 );
 
-router.get(
-  "/merchant",
-  roleBasedAuth(ROLE_MERCHANT),
-  orderController.getOrderByMerchant,
+router.get("/:id", auth, orderControllers.getOrderById);
+
+router.post(
+  "/",
+  auth,
+  roleBasedAuth(ROLE_CUSTOMER),
+  validate(orderSchema),
+  orderControllers.createOrder,
 );
 
-router.get("/:id", orderController.getOrderById);
+router.patch("/:id/cancel", auth, orderControllers.cancelOrder);
 
-router.post("/", roleBasedAuth(ROLE_CUSTOMER), orderController.createOrder);
+router.patch("/:id/confirm", auth, orderControllers.confirmOrder);
 
 router.put(
   "/:id/status",
+  auth,
   roleBasedAuth(ROLE_ADMIN),
-  orderController.updateOrderStatus,
+  validate(orderStatusSchema),
+  orderControllers.updateOrderStatus,
 );
 
-router.patch(
-  "/:id/cancel",
-  roleBasedAuth(ROLE_CUSTOMER),
-  orderController.cancelOrder,
+router.delete(
+  "/:id",
+  auth,
+  roleBasedAuth(ROLE_ADMIN),
+  orderControllers.deleteOrder,
 );
-
-router.put(
-  "/:id/payment/cash",
-  roleBasedAuth(ROLE_CUSTOMER),
-  orderController.orderPaymentViaCash,
-);
-
-router.put(
-  "/:id/confirm",
-  roleBasedAuth(ROLE_CUSTOMER),
-  orderController.confirmOrder,
-);
-
-router.put(
-  "/:id/payment/khalti",
-  roleBasedAuth(ROLE_CUSTOMER),
-  orderController.orderPaymentViaKhalti,
-);
-
-router.delete("/:id", roleBasedAuth(ROLE_ADMIN), orderController.deleteOrder);
 
 export default router;
